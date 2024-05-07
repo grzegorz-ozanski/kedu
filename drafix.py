@@ -12,11 +12,14 @@ def load_dra_file(path: Path) -> et.ElementTree:
         return et.parse(file)
 
 
-def find_user_info(document: et.ElementTree, expected_namespace: str) -> et.ElementTree:
+def find_user_info(document: et.ElementTree, namespace: str) -> et.ElementTree:
     actual_namespace = document.xpath('namespace-uri(.)')
-    assert actual_namespace == expected_namespace, (f'Actual namespace "{actual_namespace}" differs than expected one '
-                                                    f'"{expected_namespace}", document cannot be processed')
-    return document.xpath('/zus:KEDU/zus:ZUSDRA/zus:II', namespaces={'zus': expected_namespace})[0]
+    assert actual_namespace == namespace, (f'Actual namespace "{actual_namespace}" differs than expected one '
+                                           f'"{namespace}", document cannot be processed')
+    user_id_data = document.xpath('/zus:KEDU/zus:ZUSDRA/zus:II', namespaces={'zus': namespace})
+    assert len(user_id_data) == 1, (f'Malformed ZUS DRA document, expected single user id data entry, '
+                                    f'found: {len(user_id_data)}!')
+    return user_id_data[0]
 
 
 def add_user_id_data(element: et.ElementTree, document_type: str, document_id: str) -> et.ElementTree:
