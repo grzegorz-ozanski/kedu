@@ -2,7 +2,7 @@ import unittest
 import unittest.mock
 from pathlib import Path
 
-from drafix import add_user_id_data, find_user_info, load_dra_file, save_dra_file, KEDU_5_5_NAMESPACE
+from drafix import add_user_id_document, find_user_data, load_dra_file, save_dra_file, KEDU_5_5_NAMESPACE
 from lxml.etree import ElementTree, XML, tostring as xml_to_string, fromstring as xml_from_string
 from functools import partial
 from dataclasses import dataclass
@@ -34,7 +34,7 @@ class MyTestCase(unittest.TestCase):
             namespace = test_item.namespace
             document = XML(self.xml.format(namespace=namespace, user_id=''))
             try:
-                self.assertRaisesRegex(AssertionError, test_item.message, find_user_info, document, KEDU_5_5_NAMESPACE)
+                self.assertRaisesRegex(AssertionError, test_item.message, find_user_data, document, KEDU_5_5_NAMESPACE)
             except Exception:
                 print(f'{test_item = }')
                 raise
@@ -44,11 +44,11 @@ class MyTestCase(unittest.TestCase):
         for i in range(0, 2):
             document = XML(self.xml.format(namespace=KEDU_5_5_NAMESPACE, user_id=(user_id * i)))
             if i == 1:
-                _ = find_user_info(document, KEDU_5_5_NAMESPACE)
+                _ = find_user_data(document, KEDU_5_5_NAMESPACE)
             else:
                 self.assertRaisesRegex(AssertionError, 'Malformed ZUS DRA document, '
                                                        f'expected single user id data entry, found: {i}!',
-                                       find_user_info,
+                                       find_user_data,
                                        document,
                                        KEDU_5_5_NAMESPACE)
 
@@ -58,8 +58,8 @@ class MyTestCase(unittest.TestCase):
                    b'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' \
                    b'<p1/><p2/><p3/><p4>aaa</p4><p5>bbb</p5><p6/><p7/><p8/><p9/></II>'
         document = XML(self.xml.format(namespace=KEDU_5_5_NAMESPACE, user_id=user_id))
-        user_info_entry = find_user_info(document, KEDU_5_5_NAMESPACE)
-        user_info_entry = add_user_id_data(user_info_entry, 'aaa', 'bbb')
+        user_info_entry = find_user_data(document, KEDU_5_5_NAMESPACE)
+        user_info_entry = add_user_id_document(user_info_entry, 'aaa', 'bbb')
         self.assertEqual(xml_to_string(user_info_entry), expected)
 
     def test_load_xml(self):

@@ -16,17 +16,15 @@ def load_dra_file(path: Path) -> et.ElementTree:
         return et.parse(file)
 
 
-def find_user_info(document: et.ElementTree, namespace: str) -> et.ElementTree:
+def find_user_data(document: et.ElementTree, namespace: str) -> et.ElementTree:
     actual_namespace = document.xpath('namespace-uri(.)')
     assert actual_namespace == namespace, (f'Actual namespace "{actual_namespace}" differs than expected one '
                                            f'"{namespace}", document cannot be processed')
-    user_id_data = document.xpath('/zus:KEDU/zus:ZUSDRA/zus:II', namespaces={'zus': namespace})
-    assert len(user_id_data) == 1, (f'Malformed ZUS DRA document, expected single user id data entry, '
-                                    f'found: {len(user_id_data)}!')
-    return user_id_data[0]
+    user_data = document.xpath('/zus:KEDU/zus:*/zus:II', namespaces={'zus': namespace})
+    return user_data
 
 
-def add_user_id_data(element: et.ElementTree, document_type: str, document_id: str) -> et.ElementTree:
+def add_user_id_document(element: et.ElementTree, document_type: str, document_id: str) -> et.ElementTree:
     print('Patching')
 
     for idx, data in enumerate((document_type, document_id), start=3):
@@ -63,11 +61,11 @@ def main() -> None:
     document_id = args.document_id.strip().upper()
     document_type = get_document_type(document_id)
 
-    user_id_entry = find_user_info(document, KEDU_5_5_NAMESPACE)
-    add_user_id_data(user_id_entry, document_type, document_id)
+    for user_data in find_user_data(document, KEDU_5_5_NAMESPACE):
+        add_user_id_document(user_data, document_type, document_id)
 
-    if args.debug:
-        print(et.tostring(user_id_entry, pretty_print=True).decode('utf-8'))
+        if args.debug:
+            print(et.tostring(user_data, pretty_print=True).decode('utf-8'))
 
     fixed_dra_file = dra_file if args.no_backup else Path(dra_file.parent, f'{dra_file.stem}_new{dra_file.suffix}')
 
