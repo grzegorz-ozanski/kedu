@@ -52,6 +52,7 @@ python -m coverage html
 
 ## 📁 Folder tree
 
+```text
 kedu/  
 ├── tests/  
 │   └── tests.py  
@@ -65,6 +66,7 @@ kedu/
 ├── README.md  
 ├── requirements.txt  
 └── requirements-dev.txt  
+```
 
 ## 🙋‍♂️ Autor
 Created by Grzegorz Ożański  
