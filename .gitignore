@@ -2,4 +2,4 @@
 .git/**
 __pycache__
 .coverage
-*.bat
+drafix.bat
